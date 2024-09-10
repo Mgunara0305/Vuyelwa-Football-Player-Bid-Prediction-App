@@ -1,0 +1,33 @@
+System Requirements:
+
+Python 3 (Download from https://www.python.org/downloads/)
+Web browser (Chrome, Firefox, etc.)
+Getting Started:
+
+Download and Install Python: If you don't have Python installed, download the latest version from the official website and follow the installation instructions.
+Run the application:
+Open a terminal or command prompt and navigate to the directory containing the app.py file.
+Run the command python app.py.
+This will start the web application and display a message indicating the port it's running on (usually localhost:5000).
+Using the System:
+
+Open your web browser.
+Access the application: In the address bar, type http://localhost:<port>, replacing <port> with the port number displayed in the terminal when you ran app.py. (e.g., http://localhost:5000)
+Login or Register:
+If you are a new user, click on "Register" and fill out the registration form with your desired username and password.
+If you already have an account, enter your username and password in the login form and click "Login".
+Predicting Player Bid Price:
+
+You will be directed to the dashboard.
+The dashboard will have a form where you can input player attributes like age, position, goals scored, assists, etc.
+Fill in all the details in the form for the player you want to predict the bid price for.
+Click the "Predict" button.
+The system will process the input data and display the predicted bid price for the player.
+Additional Notes:
+
+This is a basic user manual, and the specific functionalities of the system may vary depending on the implementation.
+The system likely uses a pre-trained machine learning model to predict bid prices.
+For more advanced features or troubleshooting, consult the application developer.
+Disclaimer:
+
+This user manual is for informational purposes only and may not cover all aspects of the system. The accuracy of the predicted bid price depends on the quality of the underlying data and the machine learning model.
