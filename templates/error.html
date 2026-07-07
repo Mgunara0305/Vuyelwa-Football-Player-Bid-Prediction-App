@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — VuyelwaDiski{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;">
+  <div>
+    <div style="font-family:'Outfit',sans-serif;font-size:7rem;font-weight:900;color:var(--green);line-height:1;margin-bottom:16px;">{{ code }}</div>
+    <h1 style="font-size:1.8rem;margin-bottom:8px;">{{ title }}</h1>
+    <p style="color:var(--text-muted);margin-bottom:32px;max-width:400px;">{{ message }}</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <a href="{{ url_for('home') }}" class="btn-vd btn-green">
+        <i class="fa-solid fa-house"></i> Go Home
+      </a>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard') }}" class="btn-vd btn-ghost">
+        <i class="fa-solid fa-chart-line"></i> Predictor
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

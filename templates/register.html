@@ -1,68 +1,221 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Create Account — VuyelwaDiski{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-image: url('static/img/pele.jpeg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }
-        .card {
-            background-color: rgba(255, 255, 255, 0.8); /* Set a semi-transparent background color for the card */
-        }
-    </style>
-</head>
+{% block content %}
+<div class="auth-layout">
 
-<body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card mt-5">
-                    <div class="card-header text-center">
-                        <h2>Register</h2>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ url_for('register') }}" id="register-form">
-                            {{ form.hidden_tag() }}
-                            <div class="form-group">
-                                {{ form.username.label(class="form-label") }}
-                                {{ form.username(class="form-control") }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.password.label(class="form-label mt-3") }}
-                                {{ form.password(class="form-control") }}
-                            </div>
-                            <div class="form-group mt-4">
-                                {{ form.submit(class="btn btn-primary btn-block") }}
-                            </div>
-                        </form>
-                        <!-- Alert for success or error message -->
-                        <div id="alert" class="alert d-none" role="alert"></div>
-                    </div>
-                    <div class="card-footer text-center">
-                        <a href="{{ url_for('login') }}">Already have an account? Log In</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- ── Left Panel ── -->
+  <div class="auth-panel">
+    <span class="auth-ball">🏟️</span>
+    <div class="auth-panel-title">
+      Join the<br><span style="color:var(--orange);">Scout</span> Network
     </div>
-    <script>
-        // Function to show alert message
-        function showAlert(message, alertType) {
-            var alertElement = document.getElementById('alert');
-            alertElement.textContent =
-    </script>
-<div id="footer" class="container-fluid">
-                <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                     <p style="color:whitesmoke">&copy Vuyelwa Mguni Technologies. </p>
-                    </div>
-                </div>
+    <p class="auth-panel-sub">
+      Create your account and start predicting player market values with AI precision.
+    </p>
+    <div style="margin-top:32px;display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(0,230,118,0.08);border:1px solid var(--border-green);border-radius:10px;">
+        <span style="font-size:1.4rem;">🤖</span>
+        <div>
+          <div style="font-weight:700;font-size:0.85rem;">AI Predictions</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">Random Forest ML model</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,107,0,0.08);border:1px solid var(--border-orange);border-radius:10px;">
+        <span style="font-size:1.4rem;">📊</span>
+        <div>
+          <div style="font-weight:700;font-size:0.85rem;">Radar Charts</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">Visual attribute breakdown</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);border-radius:10px;">
+        <span style="font-size:1.4rem;">📋</span>
+        <div>
+          <div style="font-weight:700;font-size:0.85rem;">Prediction History</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">All your predictions saved</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right Panel (form) ── -->
+  <div class="auth-form-area" style="padding:32px 40px;overflow-y:auto;">
+    <div class="auth-form-box" style="max-width:500px;">
+      <div class="auth-logo">
+        <span>⚽</span> Vuyelwa<span style="color:var(--green);">Diski</span>
+      </div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Fill in your details to get started</p>
+
+      <!-- Google OAuth -->
+      <a href="{{ url_for('google_login') }}" class="btn-vd btn-google btn-block">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="flex-shrink:0;">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        Sign up with Google
+        {% if not google_configured %}
+          <span style="font-size:0.7rem;opacity:0.6;margin-left:auto;">(Setup required)</span>
+        {% endif %}
+      </a>
+
+      <div class="divider-or"><span>or create with email</span></div>
+
+      <!-- Multi-step form -->
+      <div class="step-indicator" id="step-indicator">
+        <div class="step-dot active" id="dot-0"></div>
+        <div class="step-dot" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+      </div>
+
+      <form method="POST" action="{{ url_for('register') }}" id="register-form">
+        {{ form.hidden_tag() }}
+
+        <!-- ── Step 1: Personal Info ── -->
+        <div class="step-pane active" id="step-0">
+          <h3 style="font-size:1rem;margin-bottom:4px;color:var(--text-secondary);">Step 1 of 3 · Personal Info</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:20px;">Tell us who you are</p>
+
+          <div class="form-group-vd">
+            <label class="form-label-vd">Full Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-id-card"></i></span>
+              {{ form.full_name(class="form-control-vd") }}
+            </div>
+            {% for error in form.full_name.errors %}
+              <div class="field-feedback invalid"><i class="fa-solid fa-circle-xmark"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group-vd">
+            <label class="form-label-vd">Phone Number <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-phone"></i></span>
+              {{ form.phone_number(class="form-control-vd") }}
+            </div>
+          </div>
+
+          <button type="button" class="btn-vd btn-green btn-block mt-4" onclick="goToStep(1)">
+            Continue <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- ── Step 2: Account Details ── -->
+        <div class="step-pane" id="step-1">
+          <h3 style="font-size:1rem;margin-bottom:4px;color:var(--text-secondary);">Step 2 of 3 · Account Details</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:20px;">Choose your username and email</p>
+
+          <div class="form-group-vd">
+            <label class="form-label-vd">Username</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-at"></i></span>
+              {{ form.username(class="form-control-vd", oninput="checkUsername(this)") }}
+            </div>
+            <div class="field-feedback" id="username-feedback"></div>
+            {% for error in form.username.errors %}
+              <div class="field-feedback invalid"><i class="fa-solid fa-circle-xmark"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group-vd">
+            <label class="form-label-vd">Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-envelope"></i></span>
+              {{ form.email(class="form-control-vd", oninput="checkEmail(this)") }}
+            </div>
+            <div class="field-feedback" id="email-feedback"></div>
+            {% for error in form.email.errors %}
+              <div class="field-feedback invalid"><i class="fa-solid fa-circle-xmark"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group-vd">
+            <label class="form-label-vd">Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+              {{ form.password(class="form-control-vd", id="reg-password", oninput="checkStrength(this)") }}
+              <button type="button" class="input-toggle" onclick="togglePassword('reg-password', this)">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;" id="strength-label">Enter a password (min 8 characters)</div>
+            {% for error in form.password.errors %}
+              <div class="field-feedback invalid"><i class="fa-solid fa-circle-xmark"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group-vd">
+            <label class="form-label-vd">Confirm Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+              {{ form.confirm_password(class="form-control-vd", id="reg-confirm-password") }}
+              <button type="button" class="input-toggle" onclick="togglePassword('reg-confirm-password', this)">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            {% for error in form.confirm_password.errors %}
+              <div class="field-feedback invalid"><i class="fa-solid fa-circle-xmark"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button type="button" class="btn-vd btn-ghost" style="flex:1;" onclick="goToStep(0)">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="btn-vd btn-green" style="flex:2;" onclick="goToStep(2)">
+              Continue <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Step 3: Role Selection ── -->
+        <div class="step-pane" id="step-2">
+          <h3 style="font-size:1rem;margin-bottom:4px;color:var(--text-secondary);">Step 3 of 3 · Account Type</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:20px;">How will you use VuyelwaDiski?</p>
+
+          <!-- Hidden role field -->
+          <input type="hidden" name="role" id="role-hidden" value="fan">
+
+          <div class="role-selector">
+            <div class="role-option selected" id="role-fan" onclick="selectRole('fan')">
+              <input type="radio" name="_role_display" value="fan" checked>
+              <span class="role-emoji">🏟️</span>
+              <div class="role-name">Football Fan</div>
+              <div class="role-desc">Explore predictions and discover trivia</div>
+            </div>
+            <div class="role-option admin-role" id="role-admin" onclick="selectRole('admin')">
+              <input type="radio" name="_role_display" value="admin">
+              <span class="role-emoji">🛡️</span>
+              <div class="role-name">Administrator</div>
+              <div class="role-desc">Manage users and view system analytics</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:24px;">
+            <button type="button" class="btn-vd btn-ghost" style="flex:1;" onclick="goToStep(1)">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+            <button type="submit" class="btn-vd btn-green" style="flex:2;" id="reg-submit-btn">
+              <i class="fa-solid fa-user-check"></i> Create Account
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      <p style="text-align:center;margin-top:24px;font-size:0.85rem;color:var(--text-muted);">
+        Already have an account?
+        <a href="{{ url_for('login') }}" style="color:var(--green);font-weight:600;">Sign in here</a>
+      </p>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — VuyelwaDiski{% endblock %}
+
+{% block content %}
+<div style="padding:28px 0;">
+<div class="container-vd">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap;">
+    <div style="padding:14px;background:var(--orange-glow);border:1px solid var(--border-orange);border-radius:var(--radius-md);">
+      <span style="font-size:1.6rem;">🛡️</span>
+    </div>
+    <div>
+      <h1 class="section-title" style="margin-bottom:2px;">
+        <span style="color:var(--orange);">Admin</span> Control Panel
+      </h1>
+      <p style="color:var(--text-muted);font-size:0.85rem;">Manage users, monitor predictions, and view system statistics.</p>
+    </div>
+  </div>
+
+  <!-- ── Stats Cards ── -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:32px;">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--green);">{{ stats.total_users }}</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--blue-info);">{{ stats.fan_count }}</div>
+      <div class="stat-label">Fans</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--orange);">{{ stats.admin_count }}</div>
+      <div class="stat-label">Admins</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ stats.active_count }}</div>
+      <div class="stat-label">Active Accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--gold);">{{ stats.total_predictions }}</div>
+      <div class="stat-label">Total Predictions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="font-size:1.4rem;color:var(--green);">{{ stats.top_position }}</div>
+      <div class="stat-label">Top Position</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="font-size:1.3rem;">€{{ '{:,.0f}'.format(stats.avg_value) }}</div>
+      <div class="stat-label">Avg Predicted Value</div>
+    </div>
+  </div>
+
+  <!-- ── User Management ── -->
+  <div class="glass-card" style="margin-bottom:28px;">
+    <div class="card-header-vd">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.3rem;">👥</span>
+          <div>
+            <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;">User Management</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">{{ users|length }} registered users</div>
+          </div>
+        </div>
+        <input type="text" class="form-control-vd" style="max-width:260px;padding:8px 14px;font-size:0.85rem;"
+               placeholder="🔍  Search users..." oninput="filterUsers(this.value)">
+      </div>
+    </div>
+    <div class="card-body-vd" style="padding:0;overflow-x:auto;">
+      <table class="data-table" id="users-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr id="user-row-{{ user.id }}" class="{% if not user.is_active_account %}user-inactive{% endif %}">
+            <td style="color:var(--text-muted);">{{ user.id }}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                {% if user.avatar_url %}
+                  <img src="{{ user.avatar_url }}" class="avatar-sm" alt="avatar">
+                {% else %}
+                  <span class="avatar-initials">{{ (user.full_name or user.username)[:2].upper() }}</span>
+                {% endif %}
+                <div>
+                  <div style="font-weight:600;color:var(--text-primary);font-size:0.9rem;">{{ user.full_name or '—' }}</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);">@{{ user.username }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ user.email or '—' }}</td>
+            <td>{{ user.phone_number or '—' }}</td>
+            <td><span class="status-badge {{ user.role }}">{{ user.role }}</span></td>
+            <td>
+              <span class="status-badge {% if user.is_active_account %}active{% else %}inactive{% endif %}"
+                    id="status-badge-{{ user.id }}">
+                {{ 'Active' if user.is_active_account else 'Inactive' }}
+              </span>
+            </td>
+            <td style="white-space:nowrap;font-size:0.8rem;">{{ user.created_at.strftime('%d %b %Y') }}</td>
+            <td>
+              {% if user.id != current_user.id %}
+              <div style="display:flex;gap:6px;">
+                <button class="btn-vd btn-ghost btn-sm" title="Toggle account status"
+                        onclick="toggleUser({{ user.id }})"
+                        id="toggle-btn-{{ user.id }}">
+                  {% if user.is_active_account %}
+                    <i class="fa-solid fa-ban"></i>
+                  {% else %}
+                    <i class="fa-solid fa-circle-check"></i>
+                  {% endif %}
+                </button>
+                <button class="btn-vd btn-danger btn-sm" title="Delete user"
+                        onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+              {% else %}
+              <span style="font-size:0.75rem;color:var(--text-muted);">You</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Recent Predictions ── -->
+  <div class="glass-card">
+    <div class="card-header-vd">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.3rem;">📊</span>
+        <div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;">Recent Predictions</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Last 20 predictions system-wide</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body-vd" style="padding:0;overflow-x:auto;">
+      {% if recent_predictions %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Position</th>
+            <th>Overall Rating</th>
+            <th>Predicted Value</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pred in recent_predictions %}
+          <tr>
+            <td>@{{ pred.user.username }}</td>
+            <td><span class="status-badge active">{{ pred.position }}</span></td>
+            <td style="color:var(--gold);font-weight:700;">{{ pred.overall_rating }}</td>
+            <td style="color:var(--green);font-weight:700;">€ {{ '{:,.0f}'.format(pred.predicted_value) }}</td>
+            <td style="font-size:0.8rem;color:var(--text-muted);">{{ pred.timestamp.strftime('%d %b %Y, %H:%M') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:48px;text-align:center;color:var(--text-muted);">
+        <span style="font-size:2.5rem;display:block;margin-bottom:12px;">📊</span>
+        No predictions yet
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function filterUsers(query) {
+  const rows = document.querySelectorAll('#users-table tbody tr');
+  query = query.toLowerCase();
+  rows.forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+  });
+}
+
+function toggleUser(userId) {
+  if (!confirm('Toggle this user\'s account status?')) return;
+  fetch('/admin/toggle-user/' + userId, { method: 'POST',
+    headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || '' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      const badge = document.getElementById('status-badge-' + userId);
+      const btn = document.getElementById('toggle-btn-' + userId);
+      const row = document.getElementById('user-row-' + userId);
+      if (data.is_active) {
+        badge.textContent = 'Active';
+        badge.className = 'status-badge active';
+        btn.innerHTML = '<i class="fa-solid fa-ban"></i>';
+        row.classList.remove('user-inactive');
+      } else {
+        badge.textContent = 'Inactive';
+        badge.className = 'status-badge inactive';
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        row.classList.add('user-inactive');
+      }
+    } else {
+      alert(data.error || 'Error occurred');
+    }
+  });
+}
+
+function deleteUser(userId, username) {
+  if (!confirm('Permanently delete @' + username + '? This cannot be undone.')) return;
+  fetch('/admin/delete-user/' + userId, { method: 'POST' })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('user-row-' + userId).remove();
+    } else {
+      alert(data.error || 'Error occurred');
+    }
+  });
+}
+</script>
+{% endblock %}

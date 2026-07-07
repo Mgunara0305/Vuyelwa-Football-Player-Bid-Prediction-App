@@ -1,402 +1,326 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="static/css/style.css">
-    <title>VuyelwaDiski Football Player Bid Predictor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-   <style>
-        body {
-            background-image: url('static/img/cr7.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }
-       .card {
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-    </style>
-  </head>
-  <body class="bg-dark">
+{% extends "base.html" %}
+{% block title %}Player Bid Predictor — VuyelwaDiski{% endblock %}
 
-  <div class="container">
-    <div class="row">
-      <div class="card mt-50" style="width: 100%; height: 100%">
-        <div class="card-header" style="text-align: center">
-          <div class="row">
-              <div class="col-3"></div>
-              <h1 class="col-7">VuyelwaDiski Player Bid Predictor</h1>
-            <a href="/login" class="col-2 mt-3" style="text-decoration: none;font-size:20px;">Logout</a>
+{% block content %}
+<div style="padding:28px 0;">
+<div class="container-vd">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 class="section-title">
+        <span class="t-green">Player Bid</span> Predictor
+      </h1>
+      <p class="section-sub" style="margin-bottom:0;">
+        Select a position to see the relevant attributes. Fill in the stats and click Predict.
+      </p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a href="{{ url_for('history') }}" class="btn-vd btn-ghost btn-sm">
+        <i class="fa-solid fa-clock-rotate-left"></i> My History
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Trivia Banner ── -->
+  <div class="trivia-banner">
+    <span class="t-emoji">{{ trivia.emoji }}</span>
+    <div>
+      <strong>Did You Know?</strong>
+      <div>{{ trivia.fact }}</div>
+    </div>
+    <button onclick="refreshTrivia()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:auto;padding:0 4px;" title="New fact">
+      <i class="fa-solid fa-rotate"></i>
+    </button>
+  </div>
+
+  <!-- ── Main Form ── -->
+  <form method="post" id="predict-form" accept-charset="utf-8">
+    {{ '' }}<!-- No CSRF for predict since it's a login_required AJAX endpoint -->
+
+    <!-- CORE: Always visible -->
+    <div class="glass-card" style="margin-bottom:20px;">
+      <div class="card-header-vd">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4rem;">👤</span>
+          <div>
+            <div style="font-family:'Outfit',sans-serif;font-weight:700;">Player Profile</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">Core attributes — always required</div>
           </div>
         </div>
-        <div class="card-body">
-          <div class="col-12" style="text-align: center">
-            <h5>This app predicts the value of a player bought or to be bought by any club! Try filling the details below:</h5>
+      </div>
+      <div class="card-body-vd">
+        <div class="attr-grid">
+
+          <!-- Overall Rating -->
+          <div class="attr-card">
+            <div class="attr-label"><span class="attr-icon">⭐</span> Overall Rating</div>
+            <select class="form-control-vd" id="overall_rating" name="overall_rating" required
+                    onchange="updateRange(this)">
+              {% for v in data.overall_rating %}
+                <option value="{{ v }}">{{ v }}</option>
+              {% endfor %}
+            </select>
           </div>
-          <br>
-<form method="post" accept-charset="utf-8" name="Modelform">
-<div class="row">
-  <div class="col-md-4">
-    <label><b>Select Overall Rating:</b> </label><br>
-    <select class="selectpicker form-control" id="overall_rating" name="overall_rating" required="required">
 
-       {% for overall_rating in overall_rating %}
-                            <option value="{{ overall_rating }}">{{ overall_rating }}</option>
-                            {% endfor %}
-    </select>
-  </div>
+          <!-- Position -->
+          <div class="attr-card">
+            <div class="attr-label"><span class="attr-icon">📍</span> Position</div>
+            <select class="form-control-vd" id="position" name="position" required
+                    onchange="onPositionChange(this.value)">
+              <option value="">— Select Position —</option>
+              {% for v in data.position %}
+                <option value="{{ v }}">{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Skill Moves -->
+          <div class="attr-card">
+            <div class="attr-label"><span class="attr-icon">🌀</span> Skill Moves</div>
+            <select class="form-control-vd" id="skill_moves" name="skill_moves" required>
+              {% for v in data.skill_moves %}
+                <option value="{{ v }}">{{ v }} ★</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Attacking Workrate -->
+          <div class="attr-card">
+            <div class="attr-label"><span class="attr-icon">⚡</span> Attacking Workrate</div>
+            <select class="form-control-vd" id="attacking_workrate" name="attacking_workrate" required>
+              {% for v in data.attacking_workrate %}
+                <option value="{{ v }}">{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Defensive Workrate -->
+          <div class="attr-card">
+            <div class="attr-label"><span class="attr-icon">🛡️</span> Defensive Workrate</div>
+            <select class="form-control-vd" id="defensive_workrate" name="defensive_workrate" required>
+              {% for v in data.defensive_workrate %}
+                <option value="{{ v }}">{{ v }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-  <div class="col-md-4">
-    <label><b>Select Position:</b> </label><br>
-    <select class="selectpicker form-control" id="position" name="position" required="required">
-        {% for position in position %}
-            <option value="{{ position }}">{{ position }}</option>
-        {% endfor %}
-    </select>
-</div>
-
-
-  <div class="col-md-4">
-    <label><b>Skill Moves :</b> </label><br>
-    <select class="selectpicker form-control" id="skill_moves" name="skill_moves" required="required">
-
-    {% for skill_moves in skill_moves %}
-                            <option value="{{ skill_moves }}">{{ skill_moves }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Select Attacking Workrate:</b> </label><br>
-    <select class="selectpicker form-control" id="attacking_workrate" name="attacking_workrate" required="required">
-        {% for attacking_workrate in attacking_workrate %}
-            <option value="{{ attacking_workrate }}">{{ attacking_workrate }}</option>
-        {% endfor %}
-    </select>
-</div>
-
-
-  <div class="col-md-4">
-    <label><b>Select Defensive Workrate:</b> </label><br>
-    <select class="selectpicker form-control" id="defensive_workrate" name="defensive_workrate" required="required">
-        {% for defensive_workrate in defensive_workrate %}
-            <option value="{{ defensive_workrate }}">{{ defensive_workrate }}</option>
-        {% endfor %}
-    </select>
-</div>
-
-
-  <div class="col-md-4">
-    <label><b>Pace:</b> </label><br>
-    <select class="selectpicker form-control" id="pace" name="pace" required="1">
-
-      {% for pace in pace %}
-                            <option value="{{ pace }}">{{ pace }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Shooting:</b> </label><br>
-    <select class="selectpicker form-control" id="shooting" name="shooting" required="1">
-
-      {% for shooting in shooting %}
-                            <option value="{{ shooting }}">{{ shooting }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Passing:</b> </label><br>
-    <select class="selectpicker form-control" id="passing" name="passing" required="1">
-
-      <{% for passing in passing %}
-                            <option value="{{ passing }}">{{ passing }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Dribbling:</b> </label><br>
-    <select class="selectpicker form-control" id="dribbling" name="dribbling" required="1">
-      {% for dribbling in dribbling %}
-                            <option value="{{ dribbling }}">{{ dribbling }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Defending:</b> </label><br>
-    <select class="selectpicker form-control" id="defending" name="defending" required="1">
-
-      {% for defending in defending %}
-                            <option value="{{ defending }}">{{ defending }}</option>
-                            {% endfor %}
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Physicality:</b> </label><br>
-    <select class="selectpicker form-control" id="physicality" name="physicality" required="1">
-
-      {% for physicality in physicality %}
-                            <option value="{{ physicality }}">{{ physicality }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Crossing:</b> </label><br>
-    <select class="selectpicker form-control" id="crossing" name="crossing" required="1">
-
-      {% for crossing in crossing %}
-                            <option value="{{ crossing }}">{{ crossing }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Finishing:</b> </label><br>
-    <select class="selectpicker form-control" id="finishing" name="finishing" required="1">
-
-      {% for finishing in finishing %}
-                            <option value="{{ finishing }}">{{ finishing }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Curve:</b> </label><br>
-    <select class="selectpicker form-control" id="Curve" name="Curve" required="1">
-
-      {% for Curve in Curve %}
-                            <option value="{{ Curve }}">{{ Curve }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Free-kick Accuracy:</b> </label><br>
-    <select class="selectpicker form-control" id="freekick_accuracy" name="freekick_accuracy" required="1">
-
-     {% for freekick_accuracy in freekick_accuracy %}
-                            <option value="{{ freekick_accuracy }}">{{ freekick_accuracy }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Ball Control:</b> </label><br>
-    <select class="selectpicker form-control" id="ballcontrol" name="ballcontrol" required="1">
-
-       {% for ballcontrol in ballcontrol %}
-                            <option value="{{ ballcontrol }}">{{ ballcontrol }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Sprint Speed:</b> </label><br>
-    <select class="selectpicker form-control" id="sprint_speed" name="sprint_speed" required="1">
-
-       {% for sprint_speed in sprint_speed %}
-                            <option value="{{ sprint_speed }}">{{ sprint_speed }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Agility:</b> </label><br>
-    <select class="selectpicker form-control" id="agility" name="agility" required="1">
-
-       {% for agility in agility %}
-                            <option value="{{ agility }}">{{ agility }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Reactions:</b> </label><br>
-    <select class="selectpicker form-control" id="reactions" name="reactions" required="1">
-
-      {% for reactions in reactions %}
-                            <option value="{{ reactions }}">{{ reactions }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Balance:</b> </label><br>
-    <select class="selectpicker form-control" id="balance" name="balance" required="1">
-
-      {% for balance in balance %}
-                            <option value="{{ balance }}">{{ balance }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Shot Power:</b> </label><br>
-    <select class="selectpicker form-control" id="shot_power" name="shot_power" required="1">
-
-      {% for shot_power in shot_power %}
-                            <option value="{{ shot_power }}">{{ shot_power }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Stamina:</b> </label><br>
-    <select class="selectpicker form-control" id="stamina" name="stamina" required="1">
-
-       {% for stamina in stamina %}
-                            <option value="{{ stamina }}">{{ stamina }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Aggression:</b> </label><br>
-    <select class="selectpicker form-control" id="aggression" name="aggression">
-   {% for aggression in aggression %}
-                            <option value="{{ aggression }}">{{ aggression }}</option>
-                            {% endfor %}
-</select>
-
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Interceptions:</b> </label><br>
-    <select class="selectpicker form-control" id="interceptions" name="interceptions" required="1">
-
-      {% for interceptions in interceptions %}
-                            <option value="{{ interceptions }}">{{ interceptions }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-md-4">
-    <label><b>Positioning:</b> </label><br>
-    <select class="selectpicker form-control" id="positioning" name="positioning" required="1">
-
-      {% for positioning in positioning %}
-                            <option value="{{ positioning }}">{{ positioning }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Vision:</b> </label><br>
-    <select class="selectpicker form-control" id="vision" name="vision" required="1">
-
-      {% for vision in vision %}
-                            <option value="{{ vision }}">{{ vision }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-
-  <div class="col-md-4">
-    <label><b>Composure:</b> </label><br>
-    <select class="selectpicker form-control" id="composure" name="composure" required="1">
-
-      {% for composure in composure %}
-                            <option value="{{ composure }}">{{ composure }}</option>
-                            {% endfor %}
-
-    </select>
-  </div>
-</div>
-
-  <div class="col-md-12 form-group" style="text-align: center">
-  <label><b>Marking:</b> </label><br>
-    <select class="selectpicker form-control" id="marking" name="marking" required="1">
-
-      {% for marking in marking %}
-                            <option value="{{ marking }}">{{ marking }}</option>
-                            {% endfor %}
-
-    </select>
-</div>
-  <br>
-
-  <div class="col-md-12 form-group" style="text-align: center">
-                        <button  class="btn btn-primary form-control" onclick="send_data()">Predict Value</button>
-                    </div>
-    <div class="row">
-                    <div class="col-12" style="text-align: center">
-                        <h3><span id="prediction"></span></h3>
-                    </div>
-                </div>
-</form>
         </div>
       </div>
     </div>
-  </div>
-  <script>
-function form_handler(event) {
-        event.preventDefault();
-    }
 
-    function send_data() {
-        document.querySelector('form').addEventListener("submit",form_handler);
-        //suppress form default behavior
+    <!-- ─────── POSITION TABS ─────── -->
+    <div class="glass-card" style="margin-bottom:20px;">
+      <div class="card-header-vd">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <span style="font-size:1.4rem;">🏃</span>
+          <div>
+            <div style="font-family:'Outfit',sans-serif;font-weight:700;">Position-Specific Attributes</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">Attributes change based on the selected position</div>
+          </div>
+        </div>
+        <div class="position-tabs" id="position-tabs">
+          <div class="pos-tab active" id="tab-all" onclick="showAttrPanel('all')">
+            <span class="pos-icon">📋</span> All
+          </div>
+          <div class="pos-tab" id="tab-gk" onclick="showAttrPanel('gk')">
+            <span class="pos-icon">🧤</span> GK
+          </div>
+          <div class="pos-tab" id="tab-def" onclick="showAttrPanel('def')">
+            <span class="pos-icon">🛡️</span> Defenders
+          </div>
+          <div class="pos-tab" id="tab-mid" onclick="showAttrPanel('mid')">
+            <span class="pos-icon">🔵</span> Midfielders
+          </div>
+          <div class="pos-tab" id="tab-fwd" onclick="showAttrPanel('fwd')">
+            <span class="pos-icon">⚡</span> Forwards
+          </div>
+        </div>
+      </div>
 
-        // Send and Receive data to /predict
-        var fd = new FormData(document.querySelector('form'));
+      <div class="card-body-vd">
 
-        var xhr = new XMLHttpRequest({mozSystem: true});
+        <!-- ── GK Panel ── -->
+        <div class="attr-panel" id="panel-gk">
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">
+            🧤 <strong style="color:var(--green);">Goalkeeper</strong> — Reflexes, positioning, and handling are what define a keeper.
+          </p>
+          <div class="attr-grid">
+            {% set gk_fields = [
+              ('pace', '🏃', 'Pace'), ('reactions', '⚡', 'Reactions'),
+              ('composure', '🧘', 'Composure'), ('defending', '🛡️', 'Defending'),
+              ('physicality', '💪', 'Physicality'), ('positioning', '📍', 'Positioning'),
+            ] %}
+            {% for fname, icon, label in gk_fields %}
+            <div class="attr-card">
+              <div class="attr-label"><span class="attr-icon">{{ icon }}</span> {{ label }}</div>
+              <select class="form-control-vd" id="{{ fname }}" name="{{ fname }}" required>
+                {% for v in data[fname] %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+            <!-- Hidden fields for GK (not needed for GK but required by model) -->
+            {% for hf in ['shooting','passing','dribbling','crossing','finishing','Curve','freekick_accuracy','ballcontrol','sprint_speed','agility','balance','shot_power','stamina','aggression','interceptions','vision','marking'] %}
+              <select name="{{ hf }}" style="display:none;" id="gk-hidden-{{ hf }}">
+                {% for v in data[hf] %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+              </select>
+            {% endfor %}
+          </div>
+        </div>
 
-        xhr.open('POST','/predict',true);
-        document.getElementById('prediction').innerHTML = "WAIT! Predicting Price.....";
+        <!-- ── Defenders Panel ── -->
+        <div class="attr-panel" id="panel-def">
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">
+            🛡️ <strong style="color:var(--green);">Defenders</strong> — CB, LB, RB, LWB, RWB. Marking, tackling, and reading the game.
+          </p>
+          <div class="attr-grid">
+            {% set def_fields = [
+              ('pace','🏃','Pace'),('defending','🛡️','Defending'),
+              ('interceptions','✂️','Interceptions'),('marking','🎯','Marking'),
+              ('aggression','😤','Aggression'),('physicality','💪','Physicality'),
+              ('composure','🧘','Composure'),('reactions','⚡','Reactions'),
+              ('stamina','🔋','Stamina'),('sprint_speed','💨','Sprint Speed'),
+              ('vision','👁️','Vision'),('passing','🎯','Passing'),
+            ] %}
+            {% for fname, icon, label in def_fields %}
+            <div class="attr-card">
+              <div class="attr-label"><span class="attr-icon">{{ icon }}</span> {{ label }}</div>
+              <select class="form-control-vd" id="{{ fname }}" name="{{ fname }}" required>
+                {% for v in data[fname] %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
 
-        xhr.onreadystatechange = function(){
-            if (xhr.readyState == XMLHttpRequest.DONE){
-                document.getElementById('prediction').innerHTML="Predicted Price Tag: $"+xhr.responseText;
-            }
-        };
+        <!-- ── Midfielders Panel ── -->
+        <div class="attr-panel" id="panel-mid">
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">
+            🔵 <strong style="color:var(--green);">Midfielders</strong> — CM, CAM, CDM, LM, RM. The engine of any team — passing, vision, dribbling.
+          </p>
+          <div class="attr-grid">
+            {% set mid_fields = [
+              ('passing','🎯','Passing'),('vision','👁️','Vision'),
+              ('dribbling','⚽','Dribbling'),('ballcontrol','🤹','Ball Control'),
+              ('reactions','⚡','Reactions'),('stamina','🔋','Stamina'),
+              ('composure','🧘','Composure'),('interceptions','✂️','Interceptions'),
+              ('pace','🏃','Pace'),('physicality','💪','Physicality'),
+              ('shooting','🥅','Shooting'),('freekick_accuracy','🎯','Free-kick Accuracy'),
+            ] %}
+            {% for fname, icon, label in mid_fields %}
+            <div class="attr-card">
+              <div class="attr-label"><span class="attr-icon">{{ icon }}</span> {{ label }}</div>
+              <select class="form-control-vd" id="{{ fname }}" name="{{ fname }}" required>
+                {% for v in data[fname] %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
 
-        xhr.onload= function(){};
+        <!-- ── Forwards Panel ── -->
+        <div class="attr-panel" id="panel-fwd">
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">
+            ⚡ <strong style="color:var(--green);">Forwards</strong> — ST, CF, LW, RW. Speed, finishing, and clinical precision.
+          </p>
+          <div class="attr-grid">
+            {% set fwd_fields = [
+              ('shooting','🥅','Shooting'),('finishing','🎯','Finishing'),
+              ('pace','🏃','Pace'),('sprint_speed','💨','Sprint Speed'),
+              ('dribbling','⚽','Dribbling'),('agility','🤸','Agility'),
+              ('balance','⚖️','Balance'),('shot_power','💥','Shot Power'),
+              ('crossing','↗️','Crossing'),('Curve','🌊','Curve'),
+              ('freekick_accuracy','🎯','Free-kick Accuracy'),('reactions','⚡','Reactions'),
+            ] %}
+            {% for fname, icon, label in fwd_fields %}
+            <div class="attr-card">
+              <div class="attr-label"><span class="attr-icon">{{ icon }}</span> {{ label }}</div>
+              <select class="form-control-vd" id="{{ fname }}" name="{{ fname }}" required>
+                {% for v in data[fname] %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
 
-        xhr.send(fd);
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  </body>
-</html>
+        <!-- ── All Panel (default) ── -->
+        <div class="attr-panel active" id="panel-all">
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">
+            📋 All attributes shown — select a position tab above to see only relevant ones.
+          </p>
+          <div class="attr-grid">
+            {% set all_fields = [
+              ('pace','🏃','Pace'),('shooting','🥅','Shooting'),
+              ('passing','🎯','Passing'),('dribbling','⚽','Dribbling'),
+              ('defending','🛡️','Defending'),('physicality','💪','Physicality'),
+              ('crossing','↗️','Crossing'),('finishing','🎯','Finishing'),
+              ('Curve','🌊','Curve'),('freekick_accuracy','🎯','Free-kick Acc.'),
+              ('ballcontrol','🤹','Ball Control'),('sprint_speed','💨','Sprint Speed'),
+              ('agility','🤸','Agility'),('reactions','⚡','Reactions'),
+              ('balance','⚖️','Balance'),('shot_power','💥','Shot Power'),
+              ('stamina','🔋','Stamina'),('aggression','😤','Aggression'),
+              ('interceptions','✂️','Interceptions'),('positioning','📍','Positioning'),
+              ('vision','👁️','Vision'),('composure','🧘','Composure'),('marking','🎯','Marking'),
+            ] %}
+            {% for fname, icon, label in all_fields %}
+            <div class="attr-card">
+              <div class="attr-label"><span class="attr-icon">{{ icon }}</span> {{ label }}</div>
+              <select class="form-control-vd" id="{{ fname }}" name="{{ fname }}" required>
+                {% for v in data[fname] %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Predict Button ── -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <button type="button" class="btn-vd btn-orange btn-lg" onclick="sendPrediction()" id="predict-btn" style="min-width:240px;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        Predict Player Value
+      </button>
+    </div>
+
+    <!-- ── Prediction Result ── -->
+    <div class="prediction-result" id="prediction-result">
+      <div class="prediction-label">
+        <i class="fa-solid fa-robot"></i> &nbsp;AI Predicted Market Value
+      </div>
+      <div class="predicted-amount" id="predicted-value">€ 0</div>
+      <div style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;" id="predicted-position-label"></div>
+
+      <!-- Radar Chart -->
+      <div class="radar-container">
+        <canvas id="radarChart"></canvas>
+      </div>
+
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a href="{{ url_for('history') }}" class="btn-vd btn-ghost btn-sm">
+          <i class="fa-solid fa-clock-rotate-left"></i> View History
+        </a>
+        <button type="button" class="btn-vd btn-ghost btn-sm" onclick="resetForm()">
+          <i class="fa-solid fa-rotate-left"></i> New Prediction
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-state" style="display:none;text-align:center;padding:32px;">
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div style="color:var(--text-muted);margin-top:12px;font-size:0.9rem;">Calculating player value...</div>
+    </div>
+
+  </form>
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

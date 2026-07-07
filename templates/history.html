@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}My Prediction History — VuyelwaDiski{% endblock %}
+
+{% block content %}
+<div style="padding:28px 0;">
+<div class="container-vd">
+
+  <div class="history-header">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <span style="font-size:2rem;">📋</span>
+      <div>
+        <h1 class="section-title" style="margin-bottom:4px;">
+          My <span class="t-green">Prediction</span> History
+        </h1>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin:0;">
+          You have made <strong style="color:var(--green);">{{ predictions|length }}</strong> prediction{{ 's' if predictions|length != 1 else '' }}.
+        </p>
+      </div>
+      <a href="{{ url_for('dashboard') }}" class="btn-vd btn-green btn-sm" style="margin-left:auto;">
+        <i class="fa-solid fa-plus"></i> New Prediction
+      </a>
+    </div>
+  </div>
+
+  {% if predictions %}
+  <div class="glass-card">
+    <div class="card-body-vd" style="padding:0;overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Position</th>
+            <th>Overall Rating</th>
+            <th>Predicted Value</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pred in predictions %}
+          <tr>
+            <td style="color:var(--text-muted);">{{ loop.index }}</td>
+            <td>
+              <span style="display:inline-flex;align-items:center;gap:6px;">
+                {% if pred.position in ['GK'] %}<span>🧤</span>
+                {% elif pred.position in ['CB','LB','RB','LWB','RWB'] %}<span>🛡️</span>
+                {% elif pred.position in ['CM','CAM','CDM','LM','RM'] %}<span>🔵</span>
+                {% elif pred.position in ['ST','CF','LW','RW'] %}<span>⚡</span>
+                {% else %}<span>⚽</span>{% endif %}
+                <span class="status-badge active">{{ pred.position }}</span>
+              </span>
+            </td>
+            <td>
+              <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;color:var(--gold);">
+                {{ pred.overall_rating }}
+              </div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">Overall</div>
+            </td>
+            <td>
+              <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.2rem;color:var(--green);">
+                € {{ '{:,.0f}'.format(pred.predicted_value) }}
+              </div>
+            </td>
+            <td style="font-size:0.82rem;color:var(--text-muted);white-space:nowrap;">
+              <i class="fa-regular fa-calendar" style="margin-right:4px;"></i>
+              {{ pred.timestamp.strftime('%d %b %Y') }}
+              <br>
+              <i class="fa-regular fa-clock" style="margin-right:4px;"></i>
+              {{ pred.timestamp.strftime('%H:%M') }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Summary stats -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-top:20px;">
+    <div class="stat-card">
+      <div class="stat-number" style="font-size:1.6rem;">{{ predictions|length }}</div>
+      <div class="stat-label">Total Predictions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="font-size:1.4rem;">
+        € {{ '{:,.0f}'.format(predictions|map(attribute='predicted_value')|max) }}
+      </div>
+      <div class="stat-label">Highest Value</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="font-size:1.4rem;">
+        € {{ '{:,.0f}'.format((predictions|sum(attribute='predicted_value')) / predictions|length) }}
+      </div>
+      <div class="stat-label">Average Value</div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="glass-card">
+    <div class="card-body-vd" style="text-align:center;padding:64px;">
+      <span style="font-size:4rem;display:block;margin-bottom:16px;">📊</span>
+      <h2 style="font-size:1.4rem;margin-bottom:8px;">No Predictions Yet</h2>
+      <p style="color:var(--text-muted);margin-bottom:24px;">Head to the predictor to make your first player valuation.</p>
+      <a href="{{ url_for('dashboard') }}" class="btn-vd btn-green">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Make First Prediction
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+</div>
+{% endblock %}
